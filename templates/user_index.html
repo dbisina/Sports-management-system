@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>School Sports System</title>
+    <link rel="{{ url_for('static', filename='css/user_index.css') }}"" href="style.css">
+  </head>
+  <body>
+    <nav>
+      <div class="logo">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+        <h1>Lead City Sports System</h1>
+      </div>
+    </nav>
+    
+    <main>
+      <section class="sport-section">
+        <h2>Choose a sport:</h2>
+        <div class="sport-options">
+          <label for="sport-select">Select a sport:</label>
+          <select id="sport-select" name="sport">
+            <option value="">Select a sport...</option>
+            <option value="football">Football</option>
+            <option value="basketball">Basketball</option>
+            <option value="table-tennis">Table Tennis</option>
+            <option value="swimming">Swimming</option>
+          </select>
+        </div>
+        
+        <div class="option-section hidden">
+          <label for="option-select">Select an option:</label>
+          <select id="option-select" name="option">
+            <option value="">Select an option...</option>
+            <option value="assessment">Assessment</option>
+            <option value="medical-report">Medical Report</option>
+            <option value="resources">Resources</option>
+          </select>
+        </div>
+      </section>
+      
+      <section class="info-section hidden">
+        <h2>Information:</h2>
+        <div id="info"></div>
+      </section>
+    </main>
+
+    
+<script>
+    const sportSelect = document.getElementById('sport-select');
+    const optionSelect = document.getElementById('option-select');
+    const optionSection = document.querySelector('.option-section');
+    const infoSection = document.querySelector('.info-section');
+    const info = document.getElementById('info');
+  
+    sportSelect.addEventListener('change', () => {
+      // show option select
+      optionSection.classList.remove('hidden');
+  
+      // reset info section
+      infoSection.classList.add('hidden');
+      info.innerHTML = '';
+    });
+  
+    optionSelect.addEventListener('change', () => {
+      const sport = sportSelect.value;
+      const option = optionSelect.value;
+  
+      if (sport !== '' && option !== '') {
+        // load content
+        const url = `content/${sport}/${option}.html`;
+        fetch(url)
+        .then(response => response.text())
+        .then(data => {
+          // show info section
+          infoSection.classList.remove('hidden');
+          // set content
+          info.innerHTML = data;
+        })
+        .catch(error => {
+          // show error message
+          info.innerHTML = '<p>Sorry, an error occurred while loading content.</p>'
+                });
+            }
+        });
+    </script>
+  </body>
+</html>

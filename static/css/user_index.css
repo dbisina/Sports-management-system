@@ -1,0 +1,56 @@
+nav {
+    background-color: purple;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    color: white;
+  }
+  
+  .logo img {
+    height: 50px;
+    margin-right: 10px;
+  }
+  
+  .logo h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+  
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  h2 {
+    margin-top: 0;
+  }
+  
+  .sport-section,
+  .option-section,
+  .info-section {
+    margin-bottom: 30px;
+  }
+  
+  .sport-options,
+  .option-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 10px;
+  }
+  
+  option {
+    color: purple;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
