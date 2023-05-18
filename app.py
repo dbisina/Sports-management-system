@@ -33,28 +33,23 @@ def user_index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if 'otp' in request.form:
-            # Handle OTP submission
-            otp = request.form['otp']
-            # Process OTP here
-            stored_otp = query_db(otp)
-            if stored_otp is not None and stored_otp == otp:
-                return redirect(url_for('registeration'))
-            else:
-                flash('Invalid Otp')
+        # Handle username and password submission
+        username = request.form['username']
+        password = request.form['password']
+        stored_password = query_db(username)
+        # Process username and password here
+        if username == 'admin' and password == 'admin':
+            session['username'] = username
+            return redirect(url_for('admin_index')) 
+        elif stored_password is not None and stored_password == password:
+            session['username'] = username
+            return redirect(url_for('user_index'))                
         else:
-            # Handle username and password submission
-            username = request.form['username']
-            password = request.form['password']
-            stored_password = query_db(username)
-            # Process username and password here
-            if username == 'admin' and password == 'admin':
-                session['username'] = username
-                return redirect(url_for('admin_index')) 
-            elif stored_password is not None and stored_password == password:
-                session['username'] = username
-                return redirect(url_for('user_index'))                
-            else:
-                flash('Invalid username or password')
+            flash('Invalid username or password')
     # Display login form
     return render_template('login.html')
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
