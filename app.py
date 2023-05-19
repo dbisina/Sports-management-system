@@ -1,12 +1,31 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from functools import wraps
 from werkzeug.utils import secure_filename
-import sqlite3
 import threading
 import os
+import mysql.connector
+
+# Create a connection to the database
+conn = mysql.connector.connect(
+    host='localhost',
+    user='root',
+    password='password',
+    database='lcu_database'
+)
+
+# Function to query the database
+def query_db(username):
+    cursor = conn.cursor()
+    query = "SELECT passkey FROM Students WHERE username=%s"
+    cursor.execute(query, (username,))
+    result = cursor.fetchone()
+    cursor.close()
+    if result:
+        return result[0]
+    else:
+        return None
 
 app = Flask(__name__, template_folder='templates')
-
 app.secret_key = "secret_key"
 
 # Check if user is logged in
@@ -24,7 +43,7 @@ def login_required(f):
 def admin_index():
     return render_template('admin_index.html')
 
-@app.route('/')
+@app.route('/user_index')
 @login_required
 def user_index():
     return render_template('user_index.html')
@@ -49,6 +68,12 @@ def login():
     # Display login form
     return render_template('login.html')
 
+# Logout
+@app.route('/logout')
+@login_required
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('login'))
 
 
 if __name__ == '__main__':
