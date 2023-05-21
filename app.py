@@ -15,6 +15,23 @@ class Athlete(db.Model):
     matric_number = db.Column(db.String(20), unique=True, nullable=False)
     department = db.Column(db.String(100), nullable=False)
 
+# Event model
+class Event(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.Time, nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+
+
+# Team model
+class Team(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    sport = db.Column(db.String(100), nullable=False)
+
+
+
 # Create the database tables
 db.create_all()
 
@@ -66,6 +83,28 @@ def create_event():
 def event_management():
     events = Event.query.all()
     return render_template('event_management.html', events=events)
+
+# Team creation page
+@app.route('/team/create', methods=['GET', 'POST'])
+def create_team():
+    if request.method == 'POST':
+        team_name = request.form['team-name']
+        team_sport = request.form['team-sport']
+
+        # Create a new team
+        new_team = Team(name=team_name, sport=team_sport)
+        db.session.add(new_team)
+        db.session.commit()
+
+        return redirect(url_for('team_management'))
+
+    return render_template('team_creation.html')
+
+# Team management page
+@app.route('/team/management')
+def team_management():
+    teams = Team.query.all()
+    return render_template('team_management.html', teams=teams)
 
 
 if __name__ == '__main__':
