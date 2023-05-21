@@ -30,6 +30,12 @@ class Team(db.Model):
     name = db.Column(db.String(100), nullable=False)
     sport = db.Column(db.String(100), nullable=False)
 
+# Competition model
+class Competition(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+
 
 
 # Create the database tables
@@ -105,6 +111,29 @@ def create_team():
 def team_management():
     teams = Team.query.all()
     return render_template('team_management.html', teams=teams)
+
+
+# Competition details page
+@app.route('/competition/details', methods=['GET', 'POST'])
+def competition_details():
+    if request.method == 'POST':
+        tournament_name = request.form['tournament-name']
+        tournament_date = request.form['tournament-date']
+
+        # Register a new tournament
+        new_tournament = Competition(name=tournament_name, date=tournament_date)
+        db.session.add(new_tournament)
+        db.session.commit()
+
+        return redirect(url_for('competition_management'))
+
+    return render_template('competition_details.html')
+
+# Competition management page
+@app.route('/competition/management')
+def competition_management():
+    tournaments = Competition.query.all()
+    return render_template('competition_management.html', tournaments=tournaments)
 
 
 if __name__ == '__main__':
