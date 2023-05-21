@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+            <h1>LEAD CITY UNIVERSITY</h1>
+        </div>
+        <div class="buttons">
+            <a class="register-btn" href="#">Register</a>
+            <a class="login-btn" href="#">Go to Login</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>User Registration</h1>
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label for="first-name">First Name:</label>
+                <input type="text" id="first-name" name="first-name" required>
+            </div>
+            <div class="form-group">
+                <label for="last-name">Last Name:</label>
+                <input type="text" id="last-name" name="last-name" required>
+            </div>
+            <div class="form-group">
+                <label for="other-names">Other Names:</label>
+                <input type="text" id="other-names" name="other-names">
+            </div>
+            <div class="form-group">
+                <label for="matric-number">Matriculation Number:</label>
+                <input type="text" id="matric-number" name="matric-number" required>
+            </div>
+            <div class="form-group">
+                <label for="department">Department:</label>
+                <input type="text" id="department" name="department" required>
+            </div>
+            <input type="submit" value="Register">
+        </form>
+    </div>
+</body>
+</html>
