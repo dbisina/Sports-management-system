@@ -1,0 +1,21 @@
+/* CSS styles from the previous responses */
+
+.container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.container th, .container td {
+    padding: 10px;
+    text-align: left;
+}
+
+.container th {
+    background-color: #6933FF;
+    color: white;
+}
+
+.container tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
