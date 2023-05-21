@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Event</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+            <h1>LEAD CITY UNIVERSITY</h1>
+        </div>
+        <div class="buttons">
+            <a class="register-btn" href="#">Register</a>
+            <a class="login-btn" href="#">Go to Login</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Create Event</h1>
+        <form method="POST" action="{{ url_for('create_event') }}">
+            <div class="form-group">
+                <label for="event-name">Event Name:</label>
+                <input type="text" id="event-name" name="event-name" required>
+            </div>
+            <div class="form-group">
+                <label for="event-date">Event Date:</label>
+                <input type="date" id="event-date" name="event-date" required>
+            </div>
+            <div class="form-group">
+                <label for="event-time">Event Time:</label>
+                <input type="time" id="event-time" name="event-time" required>
+            </div>
+            <div class="form-group">
+                <label for="event-location">Event Location:</label>
+                <input type="text" id="event-location" name="event-location" required>
+            </div>
+            <input type="submit" value="Create Event">
+        </form>
+    </div>
+</body>
+</html>
