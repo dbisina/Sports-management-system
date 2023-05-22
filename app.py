@@ -1,23 +1,27 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+import Flask, render_template, request, redirect, url_for, flash, session
 from functools import wraps
 from werkzeug.utils import secure_filename
 import threading
 import os
 import mysql.connector
+from flask_mysqldb import MySQL
+import random
+    
+app = Flask(__name__, template_folder='templates')
+app.secret_key = "secret_key"
 
-# Create a connection to the database
-conn = mysql.connector.connect(
-    host='localhost',
-    user='root',
-    password='password',
-    database='lcu_database'
-)
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'password'
+app.config['MYSQL_DB'] = 'lcu_database'
 
-# Function to query the database
-def query_db(username):
-    cursor = conn.cursor()
-    query = "SELECT passkey FROM Students WHERE username=%s"
-    cursor.execute(query, (username,))
+
+mysql = MySQL(app)
+
+def query_db(matric_no):
+    cursor = mysql.connection.cursor()
+    query = "SELECT passkey FROM Students WHERE matric_no= %s"
+    cursor.execute(query, (matric_no,))
     result = cursor.fetchone()
     cursor.close()
     if result:
@@ -25,8 +29,25 @@ def query_db(username):
     else:
         return None
 
-app = Flask(__name__, template_folder='templates')
-app.secret_key = "secret_key"
+def query_db_otp(otp):
+    cursor = mysql.connection.cursor()
+    query = "SELECT passkey FROM otp WHERE passkey = %s"  # Specify the column name in the WHERE clause
+    cursor.execute(query, (otp,))
+    result = cursor.fetchone()
+    cursor.close()
+    if result:
+        return result[0]
+    else:
+        return None
+
+def save_user(first_name, last_name, matric_no, passkey, department, phone_number):
+    cursor = mysql.connection.cursor()
+    query = "INSERT INTO Students (first_name, last_name, matric_no, passkey, department, phone_number) VALUES (%s, %s, %s, %s, %s, %s)"
+    cursor.execute(query, (first_name, last_name, matric_no, passkey, department, phone_number))
+    mysql.connection.commit()
+    user_id = cursor.lastrowid
+    cursor.close()
+    return user_id
 
 # Set up file upload folder
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -49,7 +70,7 @@ def login_required(f):
     return decorated_function
 
 # Homepage
-@app.route('/')
+@app.route('/admin_index')
 @login_required
 def admin_index():
     return render_template('admin_index.html')
@@ -63,38 +84,49 @@ def user_index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if 'otp' in request.form:
-            # Handle OTP submission
-            otp = request.form['otp']
-            # Process OTP here
-            stored_otp = query_db(otp)
-            if stored_otp is not None and stored_otp == otp:
-                return redirect(url_for('registeration'))
-            else:
-                flash('Invalid Otp')
+        # Handle username and password submission
+        matric_no = request.form['username']
+        passkey = request.form['password']
+        stored_password = query_db(matric_no)
+        # Process username and password here
+        if matric_no == 'admin' and passkey == 'admin':
+            session['username'] = matric_no
+            return redirect(url_for('admin_index'))
+        elif stored_password is not None and stored_password == passkey:
+            session['username'] = matric_no
+            return redirect(url_for('user_index'))
         else:
-            # Handle username and password submission
-            username = request.form['username']
-            password = request.form['password']
-            stored_password = query_db(username)
-            # Process username and password here
-            if username == 'admin' and password == 'admin':
-                session['username'] = username
-                return redirect(url_for('admin_index')) 
-            elif stored_password is not None and stored_password == password:
-                session['username'] = username
-                return redirect(url_for('user_index'))                
-            else:
-                flash('Invalid username or password')
+            flash('Invalid username or password')
+
     # Display login form
     return render_template('login.html')
+
 
 # Logout
 @app.route('/logout')
 @login_required
 def logout():
-    session.pop('username', None)
+    session.pop('matric_no', None)
     return redirect(url_for('login'))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        first_name = request.form["first-name"]
+        last_name = request.form["last-name"]
+        matric_no = request.form["matric-no"]
+        passkey = request.form["password"]
+        confirm_password = request.form["confirm-password"]
+        department = request.form["department"]
+        phone_number = request.form["phone-number"]
+
+        if passkey != confirm_password:
+            flash("Passwords do not match.")
+        else:
+            user_id = save_user(first_name, last_name, matric_no, passkey, department, phone_number)
+            session['matric_no'] = matric_no
+            return redirect(url_for('login'))
+    return render_template('registeration_user.html')
 
 # Upload file
 @app.route('/upload', methods=['GET', 'POST'])
@@ -132,17 +164,7 @@ def edit(filename):
             text = f.read()
         return render_template('edit.html', filename=filename, text=text)
 
-# Share file
-@app.route('/share/<filename>', methods=['GET', 'POST'])
-@login_required
-def share(filename):
-    if request.method == 'POST':
-        recipient = request.form['recipient']
-        # code to send the file to the recipient goes here
-        flash('File shared successfully')
-        return redirect(url_for('index'))
-    else:
-        return render_template('share.html', filename=filename)
+
 
 # Delete file
 @app.route('/delete/<filename>')
@@ -151,30 +173,144 @@ def delete(filename):
     os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     flash('File deleted successfully')
 
-# Recycle bin
-@app.route('/recycle-bin')
-@login_required
-def recycle_bin():
-    deleted_files = []
-    for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-        if filename.startswith('.'):
-            continue
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            if not os.path.isfile(file_path):
-                continue
-                deleted_files.append(filename)
-    return render_template('recycle-bin.html', deleted_files=deleted_files)
 
-# Empty recycle bin
-@app.route('/empty-recycle-bin')
+
+
+# User management
+@app.route("/user_management")
+def user_management():
+    # Fetch all user data from the database
+    cursor = mysql.connection.cursor()
+    query = "SELECT * FROM Students"
+    cursor .execute(query)
+    users = cursor.fetchall()
+    cursor.close()
+    return render_template('user_management.html', Users=users)
+
+# Add user
+@app.route('/add_user', methods=['GET', 'POST'])
 @login_required
-def empty_recycle_bin():
-    for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-        if filename.startswith('.'):
-            continue
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            if not os.path.isfile(file_path):
-                continue
-                os.remove(file_path)
-                flash('Recycle bin emptied successfully')
-    return redirect(url_for('recycle_bin'))
+def add_user():
+    if request.method == 'POST':
+        session['matric_number'] = request.form['matric-number']
+        return redirect(url_for('generate_otp'))
+    else:
+        return render_template('add_user.html')
+
+
+    
+# Route for the Edit User page
+@app.route('/edit_user', methods=['GET', 'POST'])
+@app.route('/edit_user', methods=['GET', 'POST'])
+def edit_user():
+    if request.method == 'POST':
+        user_id = request.form['user_id']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        department = request.form['department']
+        phone_number = request.form['phone_number']
+        
+        # Update the user's details in the database
+        cursor = mysql.connection.cursor()
+        query = "UPDATE Students SET first_name = %s, last_name = %s, department = %s, phone_number = %s WHERE id = %s"
+        cursor.execute(query, (first_name, last_name, department, phone_number, user_id))
+        mysql.connection.commit()
+        cursor.close()
+        
+        flash('User details updated successfully')
+        return redirect(url_for('edit_user'))
+    else:
+        # Retrieve all users from the database
+        cursor = mysql.connection.cursor()
+        query = "SELECT * FROM Students"
+        cursor.execute(query)
+        users = cursor.fetchall()
+        cursor.close()
+        
+        return render_template('edit_user.html', users=users)
+
+
+# Route for the Delete User page
+@app.route('/delete_user', methods=['GET', 'POST'])
+def delete_user():
+    if request.method == 'POST':
+        if 'delete_selected' in request.form:
+            selected_users = request.form.getlist('selected_users')
+            
+            # Delete the selected users from the database
+            cursor = mysql.connection.cursor()
+            for user_id in selected_users:
+                query = "DELETE FROM Students WHERE id = %s"
+                cursor.execute(query, (user_id,))
+            mysql.connection.commit()
+            cursor.close()
+            
+            flash('Selected users deleted successfully')
+        elif 'delete_all' in request.form:
+            # Delete all users from the database
+            cursor = mysql.connection.cursor()
+            query = "DELETE FROM Students"
+            cursor.execute(query)
+            mysql.connection.commit()
+            cursor.close()
+            
+            flash('All users deleted successfully')
+        
+        return redirect(url_for('delete_user'))
+    else:
+        # Retrieve all users from the database
+        cursor = mysql.connection.cursor()
+        query = "SELECT * FROM Students"
+        cursor.execute(query)
+        users = cursor.fetchall()
+        cursor.close()
+        
+        return render_template('delete_user.html', users=users)
+
+
+
+# Disable user
+@app.route('/disable-user/<user_id>')
+@login_required
+def disable_user(user_id):
+    # code to disable the specified user goes here
+    flash('User disabled successfully')
+    return redirect(url_for('user_management'))
+
+
+# System configuration
+@app.route('/system-configuration', methods=['GET', 'POST'])
+@login_required
+def system_configuration():
+    if request.method == 'POST':
+        # code to update the system configuration goes here
+        flash('System configuration updated successfully')
+        return redirect(url_for('system_configuration'))
+    else:
+        # code to retrieve the current system configuration goes here
+        return render_template('system-configuration.html')
+
+# Back up system
+@app.route('/backup-system')
+@login_required
+def backup_system():
+    # code to back up the system goes here
+    flash('System backed up successfully')
+    return redirect(url_for('index'))
+
+# Manage logs
+@app.route('/manage-logs')
+@login_required
+def manage_logs():
+    # code to retrieve and display the system logs goes here
+    return render_template('manage-logs.html')
+
+
+    
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+
+print('             ~lyon98.dbios')
