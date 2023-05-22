@@ -1,0 +1,20 @@
+/* CSS styles from the previous response */
+
+/* Additional styles for athlete profile page */
+.profile-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.profile-container h1 {
+    text-align: center;
+    color: #6933FF;
+}
+
+.profile-container p {
+    margin-bottom: 10px;
+}

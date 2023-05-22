@@ -1,0 +1,84 @@
+body {
+    background-color: #f1f1f1;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: #6933FF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    color: white;
+}
+
+.logo img {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.container {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+}
+
+h1 {
+    text-align: center;
+    color: #6933FF;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #6933FF;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #6933FF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.buttons {
+    display: flex;
+    align-items: center;
+}
+
+.register-btn,
+.login-btn {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    background-color: #6933FF;
+    transition: background-color 0.3s;
+}
+
+.register-btn:hover,
+.login-btn:hover {
+    background-color: #451CAA;
+}
