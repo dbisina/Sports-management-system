@@ -124,45 +124,47 @@ def register():
         else:
             user_id = save_user(first_name, last_name, matric_no, passkey, department, phone_number)
             session['matric_no'] = matric_no
-            return redirect(url_for('login'))
+            return redirect(url_for('athlete_registeration'))
     
     return render_template('registeration.html')
 
-# Upload file
-@app.route('/upload', methods=['GET', 'POST'])
-@login_required
-def upload():
+#athlete Registeration
+@app.route('/', methods=['GET', 'POST'])
+def athlete_registration():
     if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            flash('File uploaded successfully')
-            return redirect(url_for('index'))
-        else:
-            flash('Invalid file type')
-    return render_template('upload.html')
+        first_name = request.form['first-name']
+        last_name = request.form['last-name']
+        date_of_birth = request.form['date-of-birth']
+        gender = request.form['gender']
+        sport = request.form['sport']
+        email = request.form['email']
+        phone = request.form['phone']
 
-# Download file
-@app.route('/download/<filename>')
-@login_required
-def download(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO athletes (first_name, last_name, date_of_birth, gender, sport, email, phone) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    (first_name, last_name, date_of_birth, gender, sport, email, phone))
+        mysql.connection.commit()
+        cur.close()
 
-# Edit file
-@app.route('/edit/<filename>', methods=['GET', 'POST'])
-@login_required
-def edit(filename):
-    if request.method == 'POST':
-        new_text = request.form['text']
-        with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'w') as f:
-            f.write(new_text)
-            flash('File edited successfully')
-            return redirect(url_for('index'))
+        return 'Registration Successful'
+
+    return render_template('athlete_registration.html')
+
+
+#athlete_profile
+@app.route('/athlete/<int:athlete_id>')
+def athlete_profile(athlete_id):
+    # Fetch athlete data from the database
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM athletes WHERE id = %s", (athlete_id,))
+    athlete = cur.fetchone()
+    cur.close()
+
+    if athlete:
+        return render_template('athlete_profile.html', athlete=athlete)
     else:
-        with open(os.path.join(app.config['UPLOAD_FOLDER'], filename), 'r') as f:
-            text = f.read()
-        return render_template('edit.html', filename=filename, text=text)
+        return 'Athlete not found'
+
 
 
 

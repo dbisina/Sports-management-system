@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Athlete Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+    }
+    .container {
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+      margin: 100px auto;
+      padding: 20px;
+      width: 600px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .profile-photo {
+      text-align: center;
+    }
+    .athlete-info {
+      margin-top: 20px;
+    }
+    .account-overview {
+      margin-top: 20px;
+    }
+    .team-name {
+      margin-top: 20px;
+    }
+    .upcoming-events {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Athlete Profile</h1>
+
+    <div class="profile-photo">
+      <img src="{{ url_for('static', filename='images/profile_photo.jpg') }}" alt="Profile Photo" width="200">
+    </div>
+
+    <div class="athlete-info">
+      <h2>Athlete Information</h2>
+      <p><strong>Name:</strong> {{ athlete.name }}</p>
+      <p><strong>Date of Birth:</strong> {{ athlete.date_of_birth }}</p>
+      <p><strong>Gender:</strong> {{ athlete.gender }}</p>
+      <p><strong>Sport:</strong> {{ athlete.sport }}</p>
+      <p><strong>Email:</strong> {{ athlete.email }}</p>
+      <p><strong>Phone:</strong> {{ athlete.phone }}</p>
+    </div>
+
+    <div class="account-overview">
+      <h2>Account Overview</h2>
+      <!-- Display account overview details here -->
+    </div>
+
+    <div class="team-name">
+      <h2>Team Name</h2>
+      <p>{{ athlete.team_name }}</p>
+    </div>
+
+    <div class="upcoming-events">
+      <h2>Upcoming Events</h2>
+      <!-- Display upcoming events that the athlete or athlete's teams will be participating in -->
+      <ul>
+        {% for event in athlete.upcoming_events %}
+        <li>{{ event.name }} - {{ event.date }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
