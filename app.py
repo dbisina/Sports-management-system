@@ -1,10 +1,12 @@
-import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from functools import wraps
 from werkzeug.utils import secure_filename
 import threading
 import os
 import mysql.connector
 from flask_mysqldb import MySQL
+from flask_stripe import Stripe
+
 import random
     
 app = Flask(__name__, template_folder='templates')
@@ -14,6 +16,10 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'password'
 app.config['MYSQL_DB'] = 'lcu_database'
+
+app.config['STRIPE_PUBLIC_KEY'] = 'your_stripe_public_key'
+app.config['STRIPE_SECRET_KEY'] = 'your_stripe_secret_key'
+stripe = Stripe(app)
 
 
 mysql = MySQL(app)
@@ -29,16 +35,6 @@ def query_db(matric_no):
     else:
         return None
 
-def query_db_otp(otp):
-    cursor = mysql.connection.cursor()
-    query = "SELECT passkey FROM otp WHERE passkey = %s"  # Specify the column name in the WHERE clause
-    cursor.execute(query, (otp,))
-    result = cursor.fetchone()
-    cursor.close()
-    if result:
-        return result[0]
-    else:
-        return None
 
 def save_user(first_name, last_name, matric_no, passkey, department, phone_number):
     cursor = mysql.connection.cursor()
@@ -81,7 +77,7 @@ def user_index():
     return render_template('user_index.html')
 
 # Login page
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         # Handle username and password submission
@@ -99,7 +95,9 @@ def login():
             flash('Invalid username or password')
 
     # Display login form
-    return render_template('login.html')
+    register_url = url_for('register')  # Add this line to define the register_url variable
+    return render_template('login.html', register_url=register_url)  # Pass the register_url to the template
+
 
 
 # Logout
@@ -109,6 +107,7 @@ def logout():
     session.pop('matric_no', None)
     return redirect(url_for('login'))
 
+#Register
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -126,7 +125,8 @@ def register():
             user_id = save_user(first_name, last_name, matric_no, passkey, department, phone_number)
             session['matric_no'] = matric_no
             return redirect(url_for('login'))
-    return render_template('registeration_user.html')
+    
+    return render_template('registeration.html')
 
 # Upload file
 @app.route('/upload', methods=['GET', 'POST'])
@@ -166,16 +166,6 @@ def edit(filename):
 
 
 
-# Delete file
-@app.route('/delete/<filename>')
-@login_required
-def delete(filename):
-    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    flash('File deleted successfully')
-
-
-
-
 # User management
 @app.route("/user_management")
 def user_management():
@@ -186,17 +176,6 @@ def user_management():
     users = cursor.fetchall()
     cursor.close()
     return render_template('user_management.html', Users=users)
-
-# Add user
-@app.route('/add_user', methods=['GET', 'POST'])
-@login_required
-def add_user():
-    if request.method == 'POST':
-        session['matric_number'] = request.form['matric-number']
-        return redirect(url_for('generate_otp'))
-    else:
-        return render_template('add_user.html')
-
 
     
 # Route for the Edit User page
@@ -305,24 +284,6 @@ def manage_logs():
     # code to retrieve and display the system logs goes here
     return render_template('manage-logs.html')
 
-
-    
-if __name__ == '__main__':
-    app.run(debug=True)
-
-
-
-
-print('             ~lyon98.dbios')
-
-from flask_stripe import Stripe
-
-app = Flask(__name__)
-app.secret_key = 'your_secret_key'
-app.config['STRIPE_PUBLIC_KEY'] = 'your_stripe_public_key'
-app.config['STRIPE_SECRET_KEY'] = 'your_stripe_secret_key'
-stripe = Stripe(app)
-
 # Payment processing page
 @app.route('/payment', methods=['POST'])
 def payment():
@@ -394,3 +355,16 @@ def process_payment():
         'message': 'Payment processed successfully'
     }
     return jsonify(payment_response)
+
+
+    
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+
+
+
+
+

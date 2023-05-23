@@ -1,84 +1,93 @@
+/* registeration_user.css */
+
+/* Body styles */
 body {
-    background-color: #f1f1f1;
+    background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-}
-
-.navbar {
-    background-color: #6933FF;
+  }
+  
+  /* Navigation styles */
+  nav {
+    background-color: #6a1b9a;
+    color: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    color: white;
-}
-
-.logo img {
+    padding: 10px 20px;
+  }
+  
+  nav .logo img {
     height: 40px;
-    margin-right: 10px;
-}
-
-.container {
-    max-width: 400px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ccc;
+    width: 40px;
+  }
+  
+  nav h2 {
+    font-size: 20px;
+    margin: 0;
+  }
+  
+  /* Container styles */
+  .container {
+    background-color: #fff;
     border-radius: 5px;
-    background-color: white;
-}
-
-h1 {
-    text-align: center;
-    color: #6933FF;
-}
-
-.form-group {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 400px;
+    padding: 20px;
+  }
+  
+  .container h1 {
+    color: #6a1b9a;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  /* Form styles */
+  .form-group {
     margin-bottom: 15px;
-}
-
-label {
+  }
+  
+  .form-group label {
     display: block;
+    font-weight: bold;
     margin-bottom: 5px;
-    color: #6933FF;
-}
-
-input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="password"],
+  .form-group select {
     border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-input[type="submit"] {
+    border-radius: 3px;
+    box-sizing: border-box;
+    padding: 8px;
     width: 100%;
-    padding: 10px;
-    background-color: #6933FF;
-    color: white;
+  }
+  
+  .form-group input[type="submit"] {
+    background-color: #6a1b9a;
     border: none;
-    border-radius: 4px;
+    border-radius: 3px;
+    color: #fff;
     cursor: pointer;
-}
-
-.buttons {
-    display: flex;
-    align-items: center;
-}
-
-.register-btn,
-.login-btn {
-    display: inline-block;
-    margin-left: 10px;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    text-decoration: none;
-    background-color: #6933FF;
-    transition: background-color 0.3s;
-}
-
-.register-btn:hover,
-.login-btn:hover {
-    background-color: #451CAA;
-}
+    font-size: 16px;
+    padding: 10px;
+    width: 100%;
+  }
+  
+  .form-group input[type="submit"]:hover {
+    background-color: #4a148c;
+  }
+  
+  /* Error message styles */
+  .error-message {
+    background-color: #ffebee;
+    border: 1px solid #e57373;
+    border-radius: 3px;
+    color: #f44336;
+    font-size: 14px;
+    margin-bottom: 15px;
+    padding: 8px;
+  }
+  
