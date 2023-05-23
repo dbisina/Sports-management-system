@@ -358,7 +358,6 @@ def process_payment():
     }
     return jsonify(payment_response)
 
-
     
 if __name__ == '__main__':
     app.run(debug=True)
